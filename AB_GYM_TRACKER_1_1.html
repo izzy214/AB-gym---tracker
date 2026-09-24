@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>AB GYM Tracker</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color-scheme:dark;--bg:#0b0d10;--card:#171a20;--line:#303642;--text:#f7f7f7;--muted:#b9c0cc;--accent:#66d9a6;--warn:#ffd166}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-size:18px;line-height:1.35}.wrap{max-width:520px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}h1{font-size:30px;margin:8px 0 4px;letter-spacing:.3px}h2{font-size:25px;margin:8px 0}.sub{color:var(--muted);font-size:16px;margin-bottom:20px}.menu{display:grid;gap:12px}.btn{width:100%;border:0;border-radius:16px;padding:18px 16px;background:var(--card);color:var(--text);font-weight:800;font-size:20px;text-align:left;border:1px solid var(--line)}.btn.primary{background:var(--accent);color:#07110d}.btn.small{padding:12px 14px;font-size:17px}.top{display:flex;gap:10px;margin-bottom:14px}.top .btn{flex:1}.exercise{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}.num{display:inline-flex;width:32px;height:32px;border-radius:50%;align-items:center;justify-content:center;background:var(--accent);color:#07110d;font-weight:900;margin-right:8px}.name{font-size:21px;font-weight:850}.target{color:var(--muted);font-size:15px;margin:8px 0 12px}.grid{display:grid;grid-template-columns:1.3fr .9fr .9fr;gap:8px}.lab{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:4px}input{width:100%;min-height:48px;border-radius:12px;border:1px solid var(--line);background:#0f1217;color:white;font-size:20px;padding:9px;text-align:center}input:focus{outline:2px solid var(--accent)}.last{margin-top:11px;padding-top:10px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}.last strong{color:var(--text)}.actions{display:grid;gap:10px;margin-top:18px}.history-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin:9px 0}.history-date{font-weight:850}.history-row{font-size:15px;color:var(--muted);margin-top:5px}.hidden{display:none}.note{font-size:14px;color:var(--warn);margin:12px 2px}.danger{background:#2a1719}.footer{color:var(--muted);font-size:13px;text-align:center;margin-top:22px}
+</style></head><body><div class="wrap">
+<section id="home"><h1>ATHLETIC BLUEPRINT</h1><div class="sub">GYM TRACKER 1.0 · TEŽA / REPS / RIR</div><div class="menu"><button class="btn primary" onclick="openWorkout('A')">TRENING A</button><button class="btn primary" onclick="openWorkout('B')">TRENING B</button><button class="btn primary" onclick="openWorkout('C')">BOOSTER C</button><button class="btn" onclick="showHistory()">ZGODOVINA</button></div><p class="note">Vsak trening shraniš na koncu. Naslednjič pod vsako vajo vidiš zadnji vnos.</p></section>
+<section id="workout" class="hidden"><div class="top"><button class="btn small" onclick="goHome()">← MENI</button><button class="btn small" onclick="showHistory(current)">ZGODOVINA</button></div><h2 id="wtitle"></h2><div id="elist"></div><div class="actions"><button class="btn primary" onclick="saveWorkout()">SHRANI TRENING</button><button class="btn danger" onclick="clearForm()">POČISTI VNOS</button></div></section>
+<section id="history" class="hidden"><div class="top"><button class="btn small" onclick="goHome()">← MENI</button></div><h2>ZGODOVINA</h2><div id="hist"></div></section>
+<div class="footer">AB GYM · podatki ostanejo shranjeni v tem brskalniku</div></div>
+<script>
+const plans={
+A:[
+['Incline Dumbbell Press','3 × 8–12','2 RIR'],
+['Chest-Supported Row Machine','3 × 8–12','2 RIR'],
+['Single-Arm Cable Lateral Raise','3 × 12–20 / stran','1–2 RIR'],
+['Horizontal Leg Press','2 × 8–12','3 RIR'],
+['Kneeling Cable Crunch','3 × 10–15','1–2 RIR'],
+['Incline Dumbbell Curl','2 × 8–12','1–2 RIR'],
+['Cable Triceps Pushdown','2 × 10–15','1–2 RIR']],
+B:[
+['Lat Pulldown','3 × 8–12','2 RIR'],
+['Seated Dumbbell Shoulder Press','3 × 8–12','2 RIR'],
+['Romanian Deadlift','2 × 8–10','2–3 RIR'],
+['Pec Deck','2 × 10–15','1–2 RIR'],
+['Cable Reverse Fly','2 × 12–20','1–2 RIR'],
+['EZ-Bar Preacher Curl','2 × 10–15','1–2 RIR'],
+['Overhead Cable Triceps Extension','2 × 10–15','1–2 RIR'],
+['Reverse Crunch','2 × 10–15','1–2 RIR']],
+C:[
+['Lat Pulldown','2 × 10–15','2 RIR'],
+['Single-Arm Cable Lateral Raise','3 × 12–20 / stran','1–2 RIR'],
+['Cable Reverse Fly','2 × 15–20','1–2 RIR'],
+['Incline Dumbbell Curl','2 × 10–15','1 RIR'],
+['Overhead Cable Triceps Extension','2 × 10–15','1 RIR'],
+['Cable Crunch','2 × 12–15','1–2 RIR']]
+};
+let current='A';
+const home=document.getElementById('home'), workout=document.getElementById('workout'), history=document.getElementById('history'), wtitle=document.getElementById('wtitle'), elist=document.getElementById('elist'), hist=document.getElementById('hist');
+function data(){try{return JSON.parse(localStorage.getItem('abgymtracker')||'[]')}catch(e){return[]}}
+function setData(x){localStorage.setItem('abgymtracker',JSON.stringify(x))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function latestFor(w,name){return data().filter(x=>x.workout===w).reverse().flatMap(x=>x.entries).find(e=>e.name===name)}
+function openWorkout(w){current=w;home.classList.add('hidden');history.classList.add('hidden');workout.classList.remove('hidden');wtitle.textContent=w==='C'?'BOOSTER C':'TRENING '+w;elist.innerHTML='';plans[w].forEach((e,i)=>{let last=latestFor(w,e[0]);elist.insertAdjacentHTML('beforeend',`<div class="exercise"><div><span class="num">${i+1}</span><span class="name">${e[0]}</span></div><div class="target">${e[1]} · cilj ${e[2]}</div><div class="grid"><div><div class="lab">TEŽA (kg)</div><input inputmode="decimal" id="kg${i}" placeholder="kg"></div><div><div class="lab">REPS</div><input inputmode="numeric" id="reps${i}" placeholder="npr. 10"></div><div><div class="lab">RIR</div><input inputmode="decimal" id="rir${i}" placeholder="npr. 2"></div></div><div class="last">ZADNJIČ: ${last?`<strong>${esc(last.kg||'—')} kg · ${esc(last.reps||'—')} reps · RIR ${esc(last.rir||'—')}</strong>`:'še ni vnosa'}</div></div>`)});scrollTo(0,0)}
+function saveWorkout(){let entries=plans[current].map((e,i)=>({name:e[0],kg:document.getElementById('kg'+i).value.trim(),reps:document.getElementById('reps'+i).value.trim(),rir:document.getElementById('rir'+i).value.trim()}));if(!entries.some(e=>e.kg||e.reps||e.rir)){alert('Najprej vpiši vsaj en rezultat.');return}let d=data();d.push({workout:current,date:new Date().toISOString(),entries});setData(d);alert('Trening '+current+' je shranjen.');openWorkout(current)}
+function clearForm(){plans[current].forEach((_,i)=>['kg','reps','rir'].forEach(k=>document.getElementById(k+i).value=''))}
+function showHistory(filter){home.classList.add('hidden');workout.classList.add('hidden');history.classList.remove('hidden');let d=data().slice().reverse();if(filter)d=d.filter(x=>x.workout===filter);hist.innerHTML=d.length?'':'<p class="sub">Še ni shranjenih treningov.</p>';d.forEach((x,idx)=>{let date=new Date(x.date).toLocaleString('sl-SI',{dateStyle:'medium',timeStyle:'short'});let rows=x.entries.filter(e=>e.kg||e.reps||e.rir).map(e=>`<div class="history-row"><strong>${esc(e.name)}</strong><br>${esc(e.kg||'—')} kg · ${esc(e.reps||'—')} reps · RIR ${esc(e.rir||'—')}</div>`).join('');hist.insertAdjacentHTML('beforeend',`<div class="history-item"><div class="history-date">${x.workout==='C'?'BOOSTER C':'TRENING '+x.workout} · ${date}</div>${rows}</div>`)}) ;scrollTo(0,0)}
+function goHome(){workout.classList.add('hidden');history.classList.add('hidden');home.classList.remove('hidden');scrollTo(0,0)}
+</script></body></html>
